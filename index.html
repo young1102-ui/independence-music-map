@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111b27">
+  <title>대한민국 독립운동 음악지도</title>
+
+  <style>
+    :root {
+      --navy: #111b27;
+      --navy-light: #20354b;
+      --gold: #f4bd55;
+      --cream: #fff9ec;
+      --red: #b83b32;
+      --shadow: 0 12px 30px rgba(5, 17, 28, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      color: #1a2530;
+      background:
+        radial-gradient(circle at top, rgba(244, 189, 85, 0.17), transparent 35%),
+        linear-gradient(180deg, #f7f1e4 0%, #e9f2f7 100%);
+    }
+
+    button {
+      font: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      padding: 24px 14px 44px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(27px, 5vw, 48px);
+      letter-spacing: -0.045em;
+      line-height: 1.2;
+    }
+
+    header p {
+      margin: 9px 0 0;
+      color: #5f6971;
+      font-size: clamp(14px, 2.4vw, 18px);
+      line-height: 1.6;
+    }
+
+    .map-card {
+      padding: 12px;
+      border: 1px solid rgba(17, 27, 39, 0.10);
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: var(--shadow);
+    }
+
+    .map-stage {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 17px;
+      background: #c6e0f1;
+      touch-action: manipulation;
+    }
+
+    .map-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .music-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: clamp(46px, 6.8vw, 72px);
+      padding: 0;
+      border: clamp(2px, 0.25vw, 3px) solid #fff;
+      border-radius: clamp(13px, 1.7vw, 19px);
+      overflow: hidden;
+      cursor: pointer;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.34);
+      transition: width 0.22s ease, transform 0.22s ease, border-color 0.18s ease, box-shadow 0.22s ease;
+      z-index: 3;
+    }
+
+    .music-pin:hover,
+    .music-pin:focus-visible {
+      transform: translate(-50%, -50%) scale(1.05);
+      outline: 4px solid rgba(244, 189, 85, 0.52);
+      outline-offset: 2px;
+    }
+
+    .music-pin.playing {
+      width: clamp(100px, 15vw, 150px);
+      border-color: var(--gold);
+      transform: translate(-50%, -50%) scale(1);
+      box-shadow: 0 14px 34px rgba(184, 59, 50, 0.48);
+      z-index: 20;
+    }
+
+    .thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: var(--navy);
+    }
+
+    .thumb-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: grid;
+      place-items: center;
+      width: 38%;
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: rgba(10, 20, 31, 0.82);
+      border: 2px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38);
+    }
+
+    .play-icon::before {
+      content: "";
+      margin-left: 8%;
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 13px solid #fff;
+    }
+
+    .music-pin.playing .play-icon::before {
+      width: 11px;
+      height: 15px;
+      margin-left: 0;
+      border: 0;
+      border-left: 5px solid #fff;
+      border-right: 5px solid #fff;
+    }
+
+    .pin-label {
+      display: block;
+      padding: 7px 4px 8px;
+      color: #fff;
+      background: rgba(17, 27, 39, 0.97);
+      font-size: clamp(11px, 1.55vw, 15px);
+      font-weight: 800;
+      line-height: 1.12;
+      text-align: center;
+      white-space: normal;
+    }
+
+    /* 현재 표시된 지도 비율에 맞춘 위치 */
+    .seoul-01 { left: 43.2%; top: 57.4%; }
+    .seoul-02 { left: 49.1%; top: 58.1%; }
+    .yesan    { left: 40.8%; top: 67.0%; }
+    .ulsan    { left: 67.8%; top: 74.8%; }
+
+    .status-panel {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 20px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .now-playing {
+      margin: 0;
+      font-size: clamp(19px, 3.4vw, 29px);
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .status-message {
+      margin: 7px 0 0;
+      color: #dce7ee;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .help {
+      margin: 15px 4px 0;
+      color: #66727b;
+      font-size: 13px;
+      line-height: 1.65;
+      text-align: center;
+    }
+
+    audio {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        padding: 17px 7px 34px;
+      }
+
+      .map-card {
+        padding: 5px;
+        border-radius: 17px;
+      }
+
+      .map-stage {
+        border-radius: 12px;
+      }
+
+      .music-pin {
+        width: clamp(34px, 8.8vw, 46px);
+        border-width: 1.5px;
+        border-radius: 11px;
+      }
+
+      .music-pin.playing {
+        width: clamp(76px, 22vw, 104px);
+      }
+
+      .pin-label {
+        padding: 4px 2px 5px;
+        font-size: clamp(8px, 2.4vw, 11px);
+      }
+
+      .play-icon::before {
+        border-top-width: 5px;
+        border-bottom-width: 5px;
+        border-left-width: 8px;
+      }
+
+      .music-pin.playing .play-icon::before {
+        width: 8px;
+        height: 11px;
+        border-left-width: 3px;
+        border-right-width: 3px;
+      }
+
+      /* 스마트폰에서도 실제 지역 위치를 유지하며 서울 버튼만 살짝 분리 */
+      .seoul-01 { left: 42.0%; top: 57.0%; }
+      .seoul-02 { left: 49.5%; top: 58.0%; }
+      .yesan    { left: 40.0%; top: 67.2%; }
+      .ulsan    { left: 68.5%; top: 74.8%; }
+
+      .status-panel {
+        margin-top: 13px;
+        padding: 14px 10px;
+        border-radius: 16px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .music-pin {
+        width: clamp(30px, 8vw, 40px);
+      }
+
+      .music-pin.playing {
+        width: clamp(70px, 23vw, 92px);
+      }
+
+      .pin-label {
+        font-size: 8px;
+      }
+
+      .seoul-01 { left: 41.2%; top: 56.8%; }
+      .seoul-02 { left: 50.2%; top: 58.2%; }
+      .yesan    { left: 39.5%; top: 67.4%; }
+      .ulsan    { left: 69.0%; top: 74.8%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <h1>대한민국 독립운동 음악지도</h1>
+      <p>작은 썸네일을 누르면 크게 확대되며 음악이 재생되고, 다시 누르면 정지되면서 원래 크기로 돌아갑니다.</p>
+    </header>
+
+    <section class="map-card">
+      <div class="map-stage" aria-label="대한민국 독립운동 음악지도">
+        <img class="map-image" src="map.png" alt="대한민국 지도">
+
+        <button class="music-pin seoul-01"
+                type="button"
+                data-audio="seoul_01.mp3"
+                data-title="서울경기 유관순 ① 만세의 빛"
+                aria-label="서울경기 유관순 첫 번째 음악 재생 또는 정지">
+          <span class="thumb-wrap">
+            <img src="seoul_01.png" alt="">
+            <span class="play-icon" aria-hidden="true"></span>
+          </span>
+          <span class="pin-label">서울경기<br>유관순 ①</span>
+        </button>
+
+        <button class="music-pin seoul-02"
+                type="button"
+                data-audio="seoul_02.mp3"
+                data-title="서울경기 유관순 ② 만세의 빛"
+                aria-label="서울경기 유관순 두 번째 음악 재생 또는 정지">
+          <span class="thumb-wrap">
+            <img src="seoul_02.png" alt="">
+            <span class="play-icon" aria-hidden="true"></span>
+          </span>
+          <span class="pin-label">서울경기<br>유관순 ②</span>
+        </button>
+
+        <button class="music-pin yesan"
+                type="button"
+                data-audio="yesan.mp3"
+                data-title="충청도 윤봉길, 60"
+                aria-label="충청도 윤봉길 음악 재생 또는 정지">
+          <span class="thumb-wrap">
+            <img src="yesan.png" alt="">
+            <span class="play-icon" aria-hidden="true"></span>
+          </span>
+          <span class="pin-label">충청도<br>윤봉길</span>
+        </button>
+
+        <button class="music-pin ulsan"
+                type="button"
+                data-audio="ulsan.mp3"
+                data-title="경남 박상진, 새벽의 빛"
+                aria-label="경남 박상진 음악 재생 또는 정지">
+          <span class="thumb-wrap">
+            <img src="ulsan.png" alt="">
+            <span class="play-icon" aria-hidden="true"></span>
+          </span>
+          <span class="pin-label">경남<br>박상진</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="status-panel" aria-live="polite">
+      <p id="nowPlaying" class="now-playing">지역을 선택해 주세요</p>
+      <p id="statusMessage" class="status-message">한 곡이 재생되는 동안 다른 지역을 누르면 기존 음악은 자동으로 멈춥니다.</p>
+    </section>
+<audio id="audioPlayer" preload="metadata"></audio>
+  </main>
+
+  <script>
+    const pins = [...document.querySelectorAll(".music-pin")];
+    const audio = document.getElementById("audioPlayer");
+    const nowPlaying = document.getElementById("nowPlaying");
+    const statusMessage = document.getElementById("statusMessage");
+
+    let activePin = null;
+
+    function clearPlayingState() {
+      pins.forEach(pin => {
+        pin.classList.remove("playing");
+        pin.setAttribute("aria-pressed", "false");
+      });
+    }
+
+    function stopCurrent(resetTime = false) {
+      audio.pause();
+
+      if (resetTime) {
+        audio.currentTime = 0;
+      }
+
+      clearPlayingState();
+      activePin = null;
+      nowPlaying.textContent = "재생이 정지되었습니다";
+      statusMessage.textContent = "다른 지역 버튼을 눌러 음악을 들어보세요.";
+    }
+
+    pins.forEach(pin => {
+      pin.setAttribute("aria-pressed", "false");
+
+      pin.addEventListener("click", async () => {
+        const requestedFile = pin.dataset.audio;
+        const requestedTitle = pin.dataset.title;
+
+        /* 같은 버튼을 다시 누르면 일시정지 */
+        if (activePin === pin && !audio.paused) {
+          stopCurrent(false);
+          return;
+        }
+
+        /* 같은 곡이 일시정지 상태라면 이어서 재생 */
+        if (activePin === pin && audio.paused && audio.src) {
+          try {
+            await audio.play();
+            pin.classList.add("playing");
+            pin.setAttribute("aria-pressed", "true");
+            nowPlaying.textContent = requestedTitle;
+            statusMessage.textContent = "현재 재생 중 · 같은 버튼을 다시 누르면 정지됩니다.";
+          } catch (error) {
+            statusMessage.textContent = "재생할 수 없습니다. MP3 파일 이름과 형식을 확인해 주세요.";
+          }
+          return;
+        }
+
+        /* 다른 버튼을 누르면 기존 음악을 멈추고 새 음악 재생 */
+        audio.pause();
+        clearPlayingState();
+
+        activePin = pin;
+        audio.src = requestedFile;
+        audio.load();
+
+        pin.classList.add("playing");
+        pin.setAttribute("aria-pressed", "true");
+        nowPlaying.textContent = requestedTitle;
+        statusMessage.textContent = "음악을 불러오는 중입니다.";
+
+        try {
+          await audio.play();
+          statusMessage.textContent = "현재 재생 중 · 같은 버튼을 다시 누르면 정지됩니다.";
+        } catch (error) {
+          clearPlayingState();
+          activePin = null;
+          nowPlaying.textContent = "음악을 재생할 수 없습니다";
+          statusMessage.textContent = requestedFile + " 파일이 같은 폴더에 있는지 확인해 주세요.";
+        }
+      });
+    });
+
+    audio.addEventListener("ended", () => {
+      clearPlayingState();
+      activePin = null;
+      nowPlaying.textContent = "재생이 끝났습니다";
+      statusMessage.textContent = "다른 지역 버튼을 눌러 음악을 계속 들어보세요.";
+    });
+
+    audio.addEventListener("error", () => {
+      const fileName = activePin ? activePin.dataset.audio : "MP3";
+      clearPlayingState();
+      activePin = null;
+      nowPlaying.textContent = "파일을 불러오지 못했습니다";
+      statusMessage.textContent = fileName + "의 이름·위치·파일 형식을 확인해 주세요.";
+    });
+  </script>
+</body>
+</html>
