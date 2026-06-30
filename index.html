@@ -113,11 +113,22 @@
     }
 
     .music-pin.playing {
-      width: clamp(100px, 15vw, 150px);
+      width: clamp(260px, 42vw, 440px);
       border-color: var(--gold);
       transform: translate(-50%, -50%) scale(1);
       box-shadow: 0 14px 34px rgba(184, 59, 50, 0.48);
-      z-index: 20;
+      z-index: 50;
+    }
+
+
+    .music-pin.playing .pin-label {
+      padding: 10px 8px 12px;
+      font-size: clamp(20px, 3.6vw, 32px);
+      line-height: 1.25;
+    }
+
+    .music-pin.playing .play-icon {
+      width: 20%;
     }
 
     .thumb-wrap {
@@ -243,7 +254,13 @@
       }
 
       .music-pin.playing {
-        width: clamp(76px, 22vw, 104px);
+        width: clamp(190px, 66vw, 280px);
+      }
+
+
+      .music-pin.playing .pin-label {
+        padding: 8px 5px 9px;
+        font-size: clamp(18px, 6vw, 27px);
       }
 
       .pin-label {
@@ -283,7 +300,7 @@
       }
 
       .music-pin.playing {
-        width: clamp(70px, 23vw, 92px);
+        width: clamp(180px, 72vw, 250px);
       }
 
       .pin-label {
@@ -302,7 +319,7 @@
   <main class="page">
     <header>
       <h1>대한민국 독립운동 음악지도</h1>
-      <p>작은 썸네일을 누르면 크게 확대되며 음악이 재생되고, 다시 누르면 정지되면서 원래 크기로 돌아갑니다.</p>
+      <p>작은 썸네일을 누르면 크게 확대되어 제목과 이미지를 자세히 볼 수 있으며, 다시 누르면 정지되면서 원래 크기로 돌아갑니다.</p>
     </header>
 
     <section class="map-card">
