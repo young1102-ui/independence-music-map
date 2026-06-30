@@ -234,6 +234,35 @@
     }
 
     @media (max-width: 700px) {
+
+      /* 스마트폰에서는 재생 중인 썸네일을 화면 중앙에 크게 표시 */
+      .has-active-pin .map-stage::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 17, 28, 0.38);
+        z-index: 40;
+      }
+
+      .music-pin.playing {
+        position: fixed;
+        left: 50% !important;
+        top: 50% !important;
+        width: clamp(200px, 72vw, 320px);
+        transform: translate(-50%, -50%) !important;
+        z-index: 60;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+      }
+
+      .music-pin.playing .pin-label {
+        padding: 10px 8px 12px;
+        font-size: clamp(18px, 4.8vw, 24px);
+      }
+
+      .music-pin.playing .play-icon {
+        width: 18%;
+      }
+
       .page {
         padding: 17px 7px 34px;
       }
@@ -305,6 +334,15 @@
     }
 
     @media (max-width: 400px) {
+
+      .music-pin.playing {
+        width: clamp(180px, 76vw, 280px);
+      }
+
+      .music-pin.playing .pin-label {
+        font-size: clamp(16px, 5vw, 22px);
+      }
+
       .music-pin {
         width: clamp(30px, 8vw, 40px);
       }
@@ -338,7 +376,7 @@
   <main class="page">
     <header>
       <h1>대한민국 독립운동 음악지도</h1>
-      <p>작은 썸네일을 누르면 크게 확대되어 제목과 이미지를 자세히 볼 수 있으며, 다시 누르면 정지되면서 원래 크기로 돌아갑니다. 스마트폰에서는 가장자리 썸네일이 화면 안쪽으로 열립니다.</p>
+      <p>작은 썸네일을 누르면 크게 확대되어 제목과 이미지를 자세히 볼 수 있으며, 다시 누르면 정지되면서 원래 크기로 돌아갑니다. 스마트폰에서는 화면 중앙에 크게 표시됩니다. 스마트폰에서는 썸네일을 누르면 화면 중앙에 크게 뜹니다.</p>
     </header>
 
     <section class="map-card">
@@ -411,6 +449,7 @@
     let activePin = null;
 
     function clearPlayingState() {
+      document.body.classList.remove("has-active-pin");
       pins.forEach(pin => {
         pin.classList.remove("playing");
         pin.setAttribute("aria-pressed", "false");
@@ -447,6 +486,7 @@
         if (activePin === pin && audio.paused && audio.src) {
           try {
             await audio.play();
+            document.body.classList.add("has-active-pin");
             pin.classList.add("playing");
             pin.setAttribute("aria-pressed", "true");
             nowPlaying.textContent = requestedTitle;
@@ -465,6 +505,7 @@
         audio.src = requestedFile;
         audio.load();
 
+        document.body.classList.add("has-active-pin");
         pin.classList.add("playing");
         pin.setAttribute("aria-pressed", "true");
         nowPlaying.textContent = requestedTitle;
