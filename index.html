@@ -287,6 +287,16 @@
       .yesan    { left: 40.0%; top: 67.2%; }
       .ulsan    { left: 68.5%; top: 74.8%; }
 
+      /* 스마트폰에서 가장자리 썸네일이 잘리지 않도록 확대 기준점 조정 */
+      .music-pin.yesan.playing {
+        transform: translate(-28%, -68%) scale(1);
+      }
+
+      .music-pin.ulsan.playing {
+        transform: translate(-72%, -68%) scale(1);
+      }
+
+
       .status-panel {
         margin-top: 13px;
         padding: 14px 10px;
@@ -302,6 +312,15 @@
       .music-pin.playing {
         width: clamp(180px, 72vw, 250px);
       }
+
+      .music-pin.yesan.playing {
+        transform: translate(-24%, -70%) scale(1);
+      }
+
+      .music-pin.ulsan.playing {
+        transform: translate(-76%, -70%) scale(1);
+      }
+
 
       .pin-label {
         font-size: 8px;
@@ -319,7 +338,7 @@
   <main class="page">
     <header>
       <h1>대한민국 독립운동 음악지도</h1>
-      <p>작은 썸네일을 누르면 크게 확대되어 제목과 이미지를 자세히 볼 수 있으며, 다시 누르면 정지되면서 원래 크기로 돌아갑니다.</p>
+      <p>작은 썸네일을 누르면 크게 확대되어 제목과 이미지를 자세히 볼 수 있으며, 다시 누르면 정지되면서 원래 크기로 돌아갑니다. 스마트폰에서는 가장자리 썸네일이 화면 안쪽으로 열립니다.</p>
     </header>
 
     <section class="map-card">
